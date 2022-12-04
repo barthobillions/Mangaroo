@@ -11,7 +11,7 @@ import os
 # The inputed manga title will be searched in the search bar, and the first option will be chosen
 def get_link(manga):
 	manga_site = "https://manganato.com/"
-	drivers = "/drivers/chromedriver.exe"
+	drivers = "drivers/chromedriver.exe"
 	options = webdriver.ChromeOptions()
 	options.add_argument('--ignore-certificate-errors-spki-list') # blocks errors that may appear from chrome related things
 	options.add_argument('--ignore-ssl-errors')
@@ -84,24 +84,27 @@ def download_manga(parentName, name, link):
 		pass
 	# Reverses the chapters array as collected in descending order
 	# Gets link to each chapter in the list and requests the html
+	ch_counter = 1
+	ch_dir_counter1 = 1
+	ch_dir_counter2 = 0
 	for chapter in reversed(chapters):
-		current_chapter_source = requests.get(chapter.find('a').get('href')).text
-		current_chapter = bs.BeautifulSoup(current_chapter_source, 'lxml')
+		while True:
+			try:
+				current_chapter_source = requests.get(chapter.find('a').get('href')).text
+				current_chapter = bs.BeautifulSoup(current_chapter_source, 'lxml')
 
-		# Container that houses the information for the current chapter link
-		container = current_chapter.find('div', class_='container-chapter-reader')
-		# This contains all of the panels in the chapter being parsed
-		img_links_container = container.find_all('img')
+				# Container that houses the information for the current chapter link
+				container = current_chapter.find('div', class_='container-chapter-reader')
+				# This contains all of the panels in the chapter being parsed
+				img_links_container = container.find_all('img')
+				break
+			except:
+				pass
 
-		# Some manga's have a chapter naming including a space, "Chapter 1 : A Chapter"
-		# And some do not have this space, this portion deals with these cases
-		file_counter = 1
-		title = chapter.find('a').text.split(':')
-		title_string = ""
-		if title[0][-1] == " ":
-			title_string = title[0][:-1]
-		else:
-			title_string = title[0]
+		# Creates chapter name directory with naming of tens up to next tens digit
+		# This allows os.listdir() to return a sorted array
+		
+		title_string = "Chapter " + str(ch_dir_counter1) + str(ch_dir_counter2)
 
 		# The directory name of the current chapter
 		# EXAMPLE: "Material/'manga_name'/Chapter 1"
@@ -112,6 +115,12 @@ def download_manga(parentName, name, link):
 			os.mkdir(dir_name)
 		except:
 			pass
+			
+		if ch_dir_counter2 == 9:
+			ch_dir_counter1 += 1
+			ch_dir_counter2 = 0
+		else:
+			ch_dir_counter2 += 1
 
 		# The request and saving of image file in each chapter
 		# Naming method: Each panel will be incremented starting at 10 up to 19
@@ -124,27 +133,33 @@ def download_manga(parentName, name, link):
 		file_counter1 = 1
 		file_counter2 = 0
 		counter = 1
-		print(title[0] + "/" + str(len(chapters)))
+		print(str(ch_counter) + "/" + str(len(chapters)))
 		for item in img_links_container:
-			img_link = item.get('src')
-			img_data = requests.get(img_link, headers=headers).content
-			with open(dir_name + "/" + (str(file_counter1) + str(file_counter2)) + '.jpg', 'wb') as writer:
-				writer.write(img_data)
-			# Printing percentages to show progress
-			sys.stdout.write("\r" + str( int(counter/size * 100)) + "%")
-			sys.stdout.flush()
+			while True:
+				try:
+					img_link = item.get('src')
+					img_data = requests.get(img_link, headers=headers).content
+					with open(dir_name + "/" + (str(file_counter1) + str(file_counter2)) + '.jpg', 'wb') as writer:
+						writer.write(img_data)
+					# Printing percentages to show progress
+					sys.stdout.write("\r" + str( int(counter/size * 100)) + "%")
+					sys.stdout.flush()
+					break
+				except:
+					pass
 			counter += 1
 			if file_counter2 == 9:
 				file_counter1 += 1
 				file_counter2 = 0
 			else:
 				file_counter2 += 1
+		ch_counter += 1
 		print()
 
 	print("-- DOWNLOAD COMPLETED --")
 
 
-def main():
+def download_controller():
 	find_manga = input("Search manga: ")
 
 	name, link = get_link(find_manga)
@@ -157,15 +172,16 @@ def main():
 		# Tries to create parent directory. Will be made if not existing
 		# If does not exist, 'Material' directory will be made
 		print("Creating parent directory...")
+		time.sleep(.5)
 		try:
 			os.mkdir("Material")
 		except:
 			print("'Material' directory already exists.")
+			time.sleep(.5)
 			print("--- PREPARING TO DOWNLOAD ---")
 
+		time.sleep(3)
 		# RUNS THE DOWNLOAD METHOD
 		download_manga("Material", name, link)
 	else:
 		print("--- QUITTING ---")
-
-main()

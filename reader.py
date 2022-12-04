@@ -96,8 +96,8 @@ class MangaReaderGUI(QtWidgets.QWidget):
         self.statusbar.setObjectName("statusbar")
         self.MainWindow.setStatusBar(self.statusbar)
 
-        self.retranslateUi(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        self.retranslateUi()
+        QtCore.QMetaObject.connectSlotsByName(self.MainWindow)
 
     def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
@@ -183,7 +183,7 @@ def open_view_window(manga_path, manga_title, chapter):
 # Manga progression is saved in a data file called 'data.txt'
 # This file is edited and saved everytime a chapter change happens so the user can resume
 # where they left off after quitting.
-def main():
+def control_loop():
     PARENTFOLDER = "Material"
     mangas = os.listdir(PARENTFOLDER)
 
@@ -215,5 +215,3 @@ def main():
         chapter = int(file.read())
         file.close()
         open_view_window(manga_path, manga_title, chapter)
-
-main()
