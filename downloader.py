@@ -151,17 +151,13 @@ def download_controller():
 	if success == "y":
 		# Tries to create parent directory. Will be made if not existing
 		# If does not exist, 'Material' directory will be made
-		print("Creating parent directory...")
-		time.sleep(.5)
-		try:
-			os.mkdir("Material")
-		except:
-			print("'Material' directory already exists.")
-			time.sleep(.5)
-			print("--- PREPARING TO DOWNLOAD ---")
+		
+		print("--- PREPARING TO DOWNLOAD ---")
 
 		time.sleep(3)
 		# RUNS THE DOWNLOAD METHOD
 		download_manga("Material", name, link)
 	else:
 		print("--- QUITTING ---")
+
+	return name, link
