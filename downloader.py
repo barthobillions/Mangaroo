@@ -85,8 +85,6 @@ def download_manga(parentName, name, link):
 	# Reverses the chapters array as collected in descending order
 	# Gets link to each chapter in the list and requests the html
 	ch_counter = 1
-	ch_dir_counter1 = 1
-	ch_dir_counter2 = 0
 	for chapter in reversed(chapters):
 		while True:
 			try:
@@ -101,26 +99,15 @@ def download_manga(parentName, name, link):
 			except:
 				pass
 
-		# Creates chapter name directory with naming of tens up to next tens digit
-		# This allows os.listdir() to return a sorted array
-		
-		title_string = "Chapter " + str(ch_dir_counter1) + str(ch_dir_counter2)
-
 		# The directory name of the current chapter
 		# EXAMPLE: "Material/'manga_name'/Chapter 1"
-		dir_name = parentName + "/" + name + "/" + title_string
+		dir_name = parentName + "/" + name + "/" + str(ch_counter)
 
 		# Tries to create the directory with this name, in event a download retry
 		try:
 			os.mkdir(dir_name)
 		except:
 			pass
-			
-		if ch_dir_counter2 == 9:
-			ch_dir_counter1 += 1
-			ch_dir_counter2 = 0
-		else:
-			ch_dir_counter2 += 1
 
 		# The request and saving of image file in each chapter
 		# Naming method: Each panel will be incremented starting at 10 up to 19
@@ -130,8 +117,6 @@ def download_manga(parentName, name, link):
 		# file_counter1 is tens digit
 		# file_counter2 is one's digit
 		size = len(img_links_container)
-		file_counter1 = 1
-		file_counter2 = 0
 		counter = 1
 		print(str(ch_counter) + "/" + str(len(chapters)))
 		for item in img_links_container:
@@ -139,7 +124,7 @@ def download_manga(parentName, name, link):
 				try:
 					img_link = item.get('src')
 					img_data = requests.get(img_link, headers=headers).content
-					with open(dir_name + "/" + (str(file_counter1) + str(file_counter2)) + '.jpg', 'wb') as writer:
+					with open(dir_name + "/" + str(counter) + '.jpg', 'wb') as writer:
 						writer.write(img_data)
 					# Printing percentages to show progress
 					sys.stdout.write("\r" + str( int(counter/size * 100)) + "%")
@@ -148,11 +133,6 @@ def download_manga(parentName, name, link):
 				except:
 					pass
 			counter += 1
-			if file_counter2 == 9:
-				file_counter1 += 1
-				file_counter2 = 0
-			else:
-				file_counter2 += 1
 		ch_counter += 1
 		print()
 
