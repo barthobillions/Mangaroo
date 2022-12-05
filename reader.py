@@ -62,7 +62,6 @@ class MangaReaderGUI(QtWidgets.QWidget):
         self.prevChBttn.setText("PREVIOUS")
         self.prevChBttn.setObjectName("prevChBttn")
         self.prevChBttn.clicked.connect(lambda: self.btn_press(-1))
-
         #PREVIOUS CHAPTER BUTTON TOP
         self.prevChBttn = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
         self.prevChBttn.setGeometry(QtCore.QRect(panel_dist_buffer, 15, btn_length, 30))
@@ -70,7 +69,6 @@ class MangaReaderGUI(QtWidgets.QWidget):
         self.prevChBttn.setText("PREVIOUS")
         self.prevChBttn.setObjectName("prevChBttn")
         self.prevChBttn.clicked.connect(lambda: self.btn_press(-1))
-
         #NEXT CHAPTER BUTTON BOTTOM
         self.nextChBttn = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
         self.nextChBttn.setGeometry(QtCore.QRect(panel_dist_buffer + btn_length + 10, cumu_height + 15, btn_length, 30))
@@ -86,32 +84,28 @@ class MangaReaderGUI(QtWidgets.QWidget):
         self.nextChBttn.setText("NEXT")
         self.nextChBttn.setObjectName("nextChBttn")
         self.nextChBttn.clicked.connect(lambda: self.btn_press(1))
-
-        #JUMP TO CHAPTER BUTTON
+        #JUMP TO CHAPTER BUTTON BOTTOM
         self.chooseBtn = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
         self.chooseBtn.setGeometry(QtCore.QRect(panel_dist_buffer + btn_length*2 + 20, cumu_height + 15, btn_length, 30))
         self.chooseBtn.setStyleSheet("background-color: rgb(255, 188, 192)")
         self.chooseBtn.setText("...")
         self.chooseBtn.setObjectName("chooseBtn")
         self.chooseBtn.clicked.connect(lambda: self.gotoChapter())
-
-        #JUMP TO CHAPTER BUTTON
+        #JUMP TO CHAPTER BUTTON TOP
         self.chooseBtn = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
         self.chooseBtn.setGeometry(QtCore.QRect(panel_dist_buffer + btn_length*2 + 20, 15, btn_length, 30))
         self.chooseBtn.setStyleSheet("background-color: rgb(255, 188, 192)")
         self.chooseBtn.setText("...")
         self.chooseBtn.setObjectName("chooseBtn")
         self.chooseBtn.clicked.connect(lambda: self.gotoChapter())
-
-        #QUIT PROGRAM BUTTON 
+        #QUIT PROGRAM BUTTON BOTTOM
         self.quitBttn = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
         self.quitBttn.setGeometry(QtCore.QRect(WIDTH - btn_length + panel_dist_buffer, cumu_height + 15, btn_length, 30))
         self.quitBttn.setStyleSheet("background-color: rgb(255, 188, 192)")
         self.quitBttn.setText("QUIT")
         self.quitBttn.setObjectName("quitBttn")
         self.quitBttn.clicked.connect(lambda: sys.exit())
-
-        #QUIT PROGRAM BUTTON 
+        #QUIT PROGRAM BUTTON TOP
         self.quitBttn = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
         self.quitBttn.setGeometry(QtCore.QRect(WIDTH - btn_length + panel_dist_buffer, 15, btn_length, 30))
         self.quitBttn.setStyleSheet("background-color: rgb(255, 188, 192)")
@@ -119,7 +113,6 @@ class MangaReaderGUI(QtWidgets.QWidget):
         self.quitBttn.setObjectName("quitBttn")
         self.quitBttn.clicked.connect(lambda: sys.exit())
         # ============================================================================================
-
         self.MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 21))
@@ -128,7 +121,6 @@ class MangaReaderGUI(QtWidgets.QWidget):
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         self.MainWindow.setStatusBar(self.statusbar)
-
         self.retranslateUi()
         QtCore.QMetaObject.connectSlotsByName(self.MainWindow)
 
@@ -138,11 +130,10 @@ class MangaReaderGUI(QtWidgets.QWidget):
 
     # This method displays the individual panel onto the screen under the previous panel that was displayed
     def display_images(self, path, height, width, cumu_height):
-        # print("placing image with dim: " + height + width + " at 0 x " + )
         label = QtWidgets.QLabel(self.scrollAreaWidgetContents)
         label.setScaledContents(True)
         label.setGeometry(QtCore.QRect(150, cumu_height, width, height))
-        label.setObjectName("l")
+        label.setObjectName("pic_label")
         label.setPixmap(QtGui.QPixmap(path))
 
     # This method runs the display_images method the total panel number of times in a chapter
@@ -160,7 +151,7 @@ class MangaReaderGUI(QtWidgets.QWidget):
             cumu_height += height
         return cumu_height
 
-    # This method handles button presses to change chapters, "PREVIOUS" "NEXT"
+    # This method handles button presses to change chapters, "PREVIOUS" and "NEXT"
     def btn_press(self, change_chapter):
         file = open(self.manga_path + "/data.txt", "w")
         if change_chapter == 1:
@@ -191,13 +182,14 @@ class MangaReaderGUI(QtWidgets.QWidget):
             except:
                 pass
 
-
+# Takes in a list and removes a passed in extension
 def remove_extension(array, char):
     cleaned_int = []
     for item in array:
         cleaned_int.append(item.split(".")[0])
     return cleaned_int
 
+# Takes in a list of ints in the form of strings and converts every element to its int form
 def convert_to_int(array):
     converted = []
     for item in array:
@@ -232,6 +224,10 @@ def open_view_window(manga_path, manga_title, chapter):
     app.exec_()
 
 
+def update(manga_path):
+
+
+
 # The main method that handles user choosing which manga that exists in the 'Material' directory
 # If valid, the method will keep running until the quit button is pressed
 # The exit button at the top of the window will not work, QUIT needs to be pressed to safely exit
@@ -242,12 +238,22 @@ def control_loop():
     PARENTFOLDER = "Material"
     mangas = os.listdir(PARENTFOLDER)
 
+    print("================= SELECT MANGA ===================")
+    print("                *ENTER A NUMBER*")
     for manga in range(len(mangas)):
-        print(str(manga) + ": " + mangas[manga])
+        print("(" + str(manga + 1) + ")" + " - " + mangas[manga])
 
-    choice = int(input("Choose manga: "))
+    print()
+    while True:
+        choice = int(input("> "))
+        try:
+            manga_title = mangas[choice-1]
+            update(PARENTFOLDER + "/" manga_title)
+            break
+        except:
+            print("Option does not exist.")
 
-    manga_title = mangas[choice]
+
     manga_path = PARENTFOLDER + "/" + manga_title
     # Checks if user left off on a chapter that is not the first chapter
     try:
@@ -261,6 +267,7 @@ def control_loop():
     except:
         file = open(PARENTFOLDER + "/" + manga_title + "/data.txt", "w")
         file.write("0")
+        file.write("\n" + link)
         file.close()
 
     # MAIN WHILE LOOP THAT RUNS THE PROGRAM UNTIL QUIT IS PRESSED
