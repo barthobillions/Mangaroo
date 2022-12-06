@@ -110,12 +110,6 @@ def download_manga(parentName, name, link):
 			pass
 
 		# The request and saving of image file in each chapter
-		# Naming method: Each panel will be incremented starting at 10 up to 19
-		# Then restarts at the next tens digit. This allows os.listdir() to
-		# return an ordered array for parsing
-		# Example: 10.jpg, 11.jpg, 12.jpg ... 20.jpg, 21.jpg, 22.jpgs
-		# file_counter1 is tens digit
-		# file_counter2 is one's digit
 		size = len(img_links_container)
 		counter = 1
 		print(str(ch_counter) + "/" + str(len(chapters)))
@@ -127,7 +121,7 @@ def download_manga(parentName, name, link):
 					with open(dir_name + "/" + str(counter) + '.jpg', 'wb') as writer:
 						writer.write(img_data)
 					# Printing percentages to show progress
-					sys.stdout.write("\r" + str( int(counter/size * 100)) + "%")
+					sys.stdout.write("\r" + str(int(counter/size * 100)) + "%")
 					sys.stdout.flush()
 					break
 				except:
@@ -141,9 +135,7 @@ def download_manga(parentName, name, link):
 
 def download_controller():
 	find_manga = input("Search manga: ")
-
 	name, link = get_link(find_manga)
-
 	print("--- RESULTS ---")
 	print(name + ": " + link)\
 
