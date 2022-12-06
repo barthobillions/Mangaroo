@@ -1,7 +1,15 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+import bs4 as bs
+import requests
+import win32gui
+import win32con
+import time
 import cv2
 import os
 import sys
+
+# grabs the id of the console
+console = win32gui.GetForegroundWindow()
 
 # Class that represents the reader GUI, created in Pyqt5
 # - MainWindow: main window object to run the events on
@@ -111,7 +119,7 @@ class MangaReaderGUI(QtWidgets.QWidget):
         self.quitBttn.setStyleSheet("background-color: rgb(255, 188, 192)")
         self.quitBttn.setText("QUIT")
         self.quitBttn.setObjectName("quitBttn")
-        self.quitBttn.clicked.connect(lambda: sys.exit())
+        self.quitBttn.clicked.connect(lambda: self.quit_program())
         # ============================================================================================
         self.MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
@@ -153,17 +161,24 @@ class MangaReaderGUI(QtWidgets.QWidget):
 
     # This method handles button presses to change chapters, "PREVIOUS" and "NEXT"
     def btn_press(self, change_chapter):
+        ch, link = read_data_file(self.manga_path + "/data.txt")
         file = open(self.manga_path + "/data.txt", "w")
         if change_chapter == 1:
             if self.chapter_num < len(os.listdir(self.manga_path)) - 2:
-                file.write(str(self.chapter_num + 1))
+                file.write(str(self.chapter_num + 1) + "\n")
+                file.write(link)
                 file.close()
                 self.MainWindow.close()
         else:
             if self.chapter_num > 0:
-                file.write(str(self.chapter_num - 1))
+                file.write(str(self.chapter_num - 1) + "\n")
+                file.write(link)
                 file.close()
                 self.MainWindow.close()
+
+    # Function to deal with quit button press
+    def quit_program(self):
+        sys.exit()
 
     # This method handles the "GO TO" button, allows user to enter a chapter to jump right to
     # Only allows input if it falls in the range of number of chapters
@@ -174,11 +189,14 @@ class MangaReaderGUI(QtWidgets.QWidget):
         if valid:
             try:
                 if int(chapter) <= avail_ch and int(chapter) > 0:
+                    crnt_ch, link = read_data_file(self.manga_path + "/data.txt")
                     chapter = int(chapter) - 1
-                    file = open(self.manga_path + "/data.txt", "w")
-                    file.write(str(chapter))
-                    file.close()
-                    self.MainWindow.close()
+                    if crnt_ch != chapter:
+                        file = open(self.manga_path + "/data.txt", "w")
+                        file.write(str(chapter) + "\n")
+                        file.write(link)
+                        file.close()
+                        self.MainWindow.close()
             except:
                 pass
 
@@ -223,10 +241,95 @@ def open_view_window(manga_path, manga_title, chapter):
     MainWindow.show()
     app.exec_()
 
+# Reads in data file and returns the current chapter number, and link of the manga
+def read_data_file(path):
+    num = 0
+    link = ""
+    with open(path, "r") as writer:
+        num = int(writer.readline().split("\n")[0])
+        link = writer.readline()
+    return num, link
 
-def update(manga_path):
+# Checks manga site for update, will download missing chapters if prompted to
+def update(manga_path, name):
+    print("Checking site for updates on " + name)
+    time.sleep(.3)
+    _, link = read_data_file(manga_path + "/data.txt")
+    ch_in_dir = os.listdir(manga_path)
+    total_chs = len(ch_in_dir) - 1
+    # Gets the page contents at the manga link and gets it into a beautiful soup object
+    source = requests.get(link).text
+    soup = bs.BeautifulSoup(source, 'lxml')
+    # Collects the chapters list box that holds the links to every chapter
+    content = chapters = soup.find('ul', class_='row-content-chapter')
+    # The actual individual chapters collected into an array
+    chapters = content.find_all('li')
 
+    # if total amount of chapters found on site is greater than total amount of chapters
+    # in directory, this portion will run to download them
+    if len(chapters) > total_chs:
+        missing_ch = len(chapters) - total_chs
+        print("You are missing " + str(missing_ch) + " of the latest chapters.")
+        time.sleep(.3)
+        print("Would you like to update now(y/n)?")
+        choice = input("> ")
+        if choice == "y":
+            headers = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/60.0",
+               "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+               "Accept-Language": "en-US,en;q=0.9",
+               "Referer": link}
+            print("===================== UPDATING =====================")
+            add_ch = []
+            for ch in range(missing_ch):
+                add_ch.append(chapters[ch])
+            ch_counter = 1
+            for chapter in reversed(add_ch):
+                while True:
+                    try:
+                        current_chapter_source = requests.get(chapter.find('a').get('href')).text
+                        current_chapter = bs.BeautifulSoup(current_chapter_source, 'lxml')
 
+                        # Container that houses the information for the current chapter link
+                        container = current_chapter.find('div', class_='container-chapter-reader')
+                        # This contains all of the panels in the chapter being parsed
+                        img_links_container = container.find_all('img')
+                        break
+                    except:
+                        pass
+
+                # The directory name of the current chapter
+                # EXAMPLE: "Material/'manga_name'/Chapter 1"
+                total_chs += 1
+                dir_name = "Material" + "/" + name + "/" + str(total_chs)
+
+                # Tries to create the directory with this name, in event a download retry
+                try:
+                    os.mkdir(dir_name)
+                except:
+                    pass
+
+                # The request and saving of image file in each chapter
+                size = len(img_links_container)
+                counter = 1
+                print(str(ch_counter) + "/" + str(missing_ch))
+                for item in img_links_container:
+                    while True:
+                        try:
+                            img_link = item.get('src')
+                            img_data = requests.get(img_link, headers=headers).content
+                            with open(dir_name + "/" + str(counter) + '.jpg', 'wb') as writer:
+                                writer.write(img_data)
+                            # Printing percentages to show progress
+                            sys.stdout.write("\r" + str(int(counter/size * 100)) + "%")
+                            sys.stdout.flush()
+                            break
+                        except:
+                            pass
+                    counter += 1
+                ch_counter += 1
+                print()
+    print("You are up to date on " + name)
+    time.sleep(.4)
 
 # The main method that handles user choosing which manga that exists in the 'Material' directory
 # If valid, the method will keep running until the quit button is pressed
@@ -246,34 +349,31 @@ def control_loop():
     print()
     while True:
         choice = int(input("> "))
-        try:
-            manga_title = mangas[choice-1]
-            update(PARENTFOLDER + "/" manga_title)
-            break
-        except:
-            print("Option does not exist.")
+        # try:
+        #     manga_title = mangas[choice-1]
+        #     update(PARENTFOLDER + "/" + manga_title)
+        #     break
+        # except:
+        #     print("Option does not exist.")
 
+        manga_title = mangas[choice-1]
+        update(PARENTFOLDER + "/" + manga_title, manga_title)
+        break
 
     manga_path = PARENTFOLDER + "/" + manga_title
     # Checks if user left off on a chapter that is not the first chapter
-    try:
-        file = open(PARENTFOLDER + "/" + manga_title + "/data.txt", "r")
-        num = int(file.read())
-        if num > 0:
-            print("You last left off on Chapter " + str(num + 1))
-        file.close()
-    # If try did not work, that means the data.txt file does not exist
-    # This will create the file and start the user at chapter 1
-    except:
-        file = open(PARENTFOLDER + "/" + manga_title + "/data.txt", "w")
-        file.write("0")
-        file.write("\n" + link)
-        file.close()
+    num, link = read_data_file(PARENTFOLDER + "/" + manga_title + "/data.txt")
+    if num > 0:
+        print("You last left off on Chapter " + str(num + 1))
+        time.sleep(.5)
+
+    # hides the console from user, won't be brought up again
+    win32gui.ShowWindow(console , win32con.SW_HIDE)
 
     # MAIN WHILE LOOP THAT RUNS THE PROGRAM UNTIL QUIT IS PRESSED
     # Runs open_view_window at the chapter found in the 'data.txt' file
     while True:
         file = open(PARENTFOLDER + "/" + manga_title + "/data.txt", "r")
-        chapter = int(file.read())
+        chapter = int(file.readline().split("\n")[0])
         file.close()
         open_view_window(manga_path, manga_title, chapter)
