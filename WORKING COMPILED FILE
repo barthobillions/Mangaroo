@@ -1,0 +1,7 @@
+https://drive.google.com/file/d/18F5w_B4mMKhJ6Oao8tud9_PrS-m41tXv/view?usp=share_link
+=============================================================================================
+WORKING COMPILED VERSION OF THE APP CAN BE FOUND AT THE LINK ABOVE
+
+You will need to extract everything, and keep all of the files inside in one directory
+It will only work if the download_controller() function finishes as data.txt will be created
+after that.
