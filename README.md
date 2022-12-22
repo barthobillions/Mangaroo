@@ -5,7 +5,6 @@ As of currently, the GUI only consists of command line for the initial download 
 
 Working on main menu GUI where users can browse their stored media, and a portion for downloading without command line interfacing.
 
-=============================================================================================
 https://drive.google.com/file/d/18F5w_B4mMKhJ6Oao8tud9_PrS-m41tXv/view?usp=share_link
 =============================================================================================
 WORKING COMPILED VERSION OF THE APP CAN BE FOUND AT THE LINK ABOVE
