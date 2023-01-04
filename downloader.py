@@ -6,6 +6,7 @@ import time
 import sys
 import os
 
+PARENTFOLDER = "Material"
 
 # Opens a headless selenium browser and defaults to the manganato site.
 # The inputed manga title will be searched in the search bar, and the first option will be chosen
@@ -30,12 +31,16 @@ def get_link(manga):
 
 	# Tries to keep collecting the search results as some connections may be
 	# slower than others. This will deal with connection times
+	print("*Search will timeout if no results within 60 seconds*")
+	crntTime = time.time()
 	while True:
 		try:
 			search_result = browser.find_element_by_xpath('/html/body/div[1]/div[1]/div[2]/div[1]/form/div/ul/a')
 			break
 		except:
-			pass
+			if time.time() - crntTime > 60:
+				print("60 seconds elapsed with no results, timed out...")
+				return False, None, None
 
 	# Gets the link of the manga found in search bar and goes to it
 	print("--- FOUND MANGA ---")
@@ -51,15 +56,16 @@ def get_link(manga):
 		except:
 			pass
 	
-	return name, link
+	return True, name, link
 
 
 # This will use the link and name retrieved from the get_link method, along with the pathname of the manga
 # to download the chapters.
-def download_manga(parentName, name, link):
+def download_manga(name, link):
 	os.system('cls')
 	print("=======================================================================")
 	print("		        DOWNLOADING " + name)
+	print("	*If download gets stuck, exit and continue it with reader option*")
 	print("=======================================================================")
 	# Headers that allow searches and requests to be made without being redirected
 	headers = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/60.0",
@@ -79,7 +85,7 @@ def download_manga(parentName, name, link):
 	# In the event a download retry of a manga happens, a directory can be
 	# accounted for, either created or already existing
 	try:
-		os.mkdir(parentName + "/" + name)
+		os.mkdir(PARENTFOLDER + "/" + name)
 	except:
 		pass
 	# Reverses the chapters array as collected in descending order
@@ -101,7 +107,7 @@ def download_manga(parentName, name, link):
 
 		# The directory name of the current chapter
 		# EXAMPLE: "Material/'manga_name'/Chapter 1"
-		dir_name = parentName + "/" + name + "/" + str(ch_counter)
+		dir_name = PARENTFOLDER + "/" + name + "/" + str(ch_counter)
 
 		# Tries to create the directory with this name, in event a download retry
 		try:
@@ -135,21 +141,28 @@ def download_manga(parentName, name, link):
 
 def download_controller():
 	find_manga = input("Search manga: ")
-	name, link = get_link(find_manga)
+	success, name, link = get_link(find_manga)
 	print("--- RESULTS ---")
-	print(name + ": " + link)\
-
+	if not success:
+		print(find_manga + " was not found in current databases.")
+		print("Returning to main menu.")
+		time.sleep(2)
+		return
+	print(name + ": " + link)
 	success = input("Is this right(y/n)?: ")
 	if success == "y":
-		# Tries to create parent directory. Will be made if not existing
-		# If does not exist, 'Material' directory will be made
+		os.mkdir(PARENTFOLDER + "/" + name)
+		# data.txt file is created to store this information to be used
+		with open(PARENTFOLDER + "/" + name +"/data.txt", "w") as writer:
+			writer.write("0\n")
+			writer.write(link)
 		
 		print("--- PREPARING TO DOWNLOAD ---")
 
 		time.sleep(3)
 		# RUNS THE DOWNLOAD METHOD
-		download_manga("Material", name, link)
+		download_manga(name, link)
 	else:
 		print("--- QUITTING ---")
 
-	return name, link
+	# return name, link
