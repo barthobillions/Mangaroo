@@ -3,11 +3,11 @@ This is a program that allows the user to download and read manga through the GU
 The downloading is done by parsing through the manga site "Manganato", and systematically downloading panels to respective directories
 More sites will be added to increase number of available mangas for this program
 
+WORKING COMPILED VERSION OF THE APP CAN BE FOUND AT THIS LINK
 https://drive.google.com/file/d/1JCvStum8viroXGMQ6jdckc1S5TV4GIKi/view?usp=share_link
 =============================================================================================
-WORKING COMPILED VERSION OF THE APP CAN BE FOUND AT THE LINK ABOVE.
-GUI functionality is now fully working. Entire program can be used through the GUI and not the command line.
 
+DIRECTIONS
 * You will need to extract everything and keep all of the files inside in one directory
 * Upon downloading a manga, a data file will be created in its respective directory
 * This data file stores necessary information for the program to work
