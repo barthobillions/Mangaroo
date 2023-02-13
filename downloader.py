@@ -1,4 +1,5 @@
 from selenium.webdriver.common.keys import Keys
+from PyQt5 import QtCore, QtGui, QtWidgets
 from selenium import webdriver
 import bs4 as bs
 import requests
@@ -10,7 +11,7 @@ PARENTFOLDER = "Material"
 
 # Opens a headless selenium browser and defaults to the manganato site.
 # The inputed manga title will be searched in the search bar, and the first option will be chosen
-def get_link(manga):
+def get_link(console_object, manga):
 	manga_site = "https://manganato.com/"
 	drivers = "drivers/chromedriver.exe"
 	options = webdriver.ChromeOptions()
@@ -21,17 +22,17 @@ def get_link(manga):
 	options.add_argument('headless')
 
 	# Opens the browser and goes to the manga site
-	print("Connecting to site...")
+	send_to_console(console_object, "Connecting to site...", .7)
 	browser = webdriver.Chrome(drivers, options=options)
 	browser.get(manga_site)
 
 	# full xpath for the searchbar that will be inputed into
 	searchbar = browser.find_element_by_xpath('/html/body/div[1]/div[1]/div[2]/div[1]/form/input[1]').send_keys(manga)
-	print("--- CONNECTION SUCCESSFUL ---")
+	send_to_console(console_object, "--- CONNECTION SUCCESSFUL ---", .7)
 
 	# Tries to keep collecting the search results as some connections may be
 	# slower than others. This will deal with connection times
-	print("*Search will timeout if no results within 60 seconds*")
+	send_to_console(console_object, "*Search will timeout if no results within 60 seconds*", .7)
 	crntTime = time.time()
 	while True:
 		try:
@@ -39,16 +40,16 @@ def get_link(manga):
 			break
 		except:
 			if time.time() - crntTime > 60:
-				print("60 seconds elapsed with no results, timed out...")
+				send_to_console(console_object, "60 seconds elapsed with no results, timed out...", .7)
 				return False, None, None
 
 	# Gets the link of the manga found in search bar and goes to it
-	print("--- FOUND MANGA ---")
+	send_to_console(console_object, "--- FOUND MANGA ---", .7)
 	link = search_result.get_attribute("href")
 	browser.get(link)
 
 	# Once again, tries to collect the name of the manga. Will deal with different speeds of connections
-	print("--- LOADING DATA ---")
+	send_to_console(console_object, "--- LOADING DATA ---", .7)
 	while True:
 		try:
 			name = browser.find_element_by_xpath('/html/body/div[1]/div[3]/div[1]/div[2]/div[2]/h1').text
@@ -61,12 +62,14 @@ def get_link(manga):
 
 # This will use the link and name retrieved from the get_link method, along with the pathname of the manga
 # to download the chapters.
-def download_manga(name, link):
-	os.system('cls')
-	print("=======================================================================")
-	print("		        DOWNLOADING " + name)
-	print("	*If download gets stuck, exit and continue it with reader option*")
-	print("=======================================================================")
+def download_manga(console_object, name, link):
+	console_object.clear()
+	send_to_console(console_object, "=======================================================================", 0)
+	send_to_console(console_object, "		        DOWNLOADING " + name, 0)
+	send_to_console(console_object, "	-Press frown(top left) to force shutdown", 0)
+	send_to_console(console_object, "		*use if download stuck or want to cancel download*", 0)
+	send_to_console(console_object, "	-Press X(top right) to close this window", 0)
+	send_to_console(console_object, "=======================================================================", 0)
 	# Headers that allow searches and requests to be made without being redirected
 	headers = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/60.0",
            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -78,7 +81,7 @@ def download_manga(name, link):
 	soup = bs.BeautifulSoup(source, 'lxml')
 
 	# Collects the chapters list box that holds the links to every chapter
-	content = chapters = soup.find('ul', class_='row-content-chapter')
+	content = soup.find('ul', class_='row-content-chapter')
 	# The actual individual chapters collected into an array
 	chapters = content.find_all('li')
 	# Tries to create parente directory, "Material/'manga_name'"
@@ -88,10 +91,21 @@ def download_manga(name, link):
 		os.mkdir(PARENTFOLDER + "/" + name)
 	except:
 		pass
+
+	# Gets link for thumbnail and writes it to the file 'thumbnail.jpg'
+	thumbnail_link = soup.find('span', class_='info-image').find('img').get('src')
+	thumbnail = requests.get(thumbnail_link, headers=headers).content
+	with open(PARENTFOLDER + "/" + name + "/thumbnail.jpg", 'wb') as writer:
+		writer.write(thumbnail)
 	# Reverses the chapters array as collected in descending order
 	# Gets link to each chapter in the list and requests the html
+	header = console_object.text()
+	header = header.split("\n",1)[1]
 	ch_counter = 1
 	for chapter in reversed(chapters):
+		console_object.clear()
+		current_text = header + "\nCompleted " + str(ch_counter) + " of " + str(len(chapters))
+		send_to_console(console_object, current_text, 0)
 		while True:
 			try:
 				current_chapter_source = requests.get(chapter.find('a').get('href')).text
@@ -118,7 +132,6 @@ def download_manga(name, link):
 		# The request and saving of image file in each chapter
 		size = len(img_links_container)
 		counter = 1
-		print(str(ch_counter) + "/" + str(len(chapters)))
 		for item in img_links_container:
 			while True:
 				try:
@@ -126,43 +139,44 @@ def download_manga(name, link):
 					img_data = requests.get(img_link, headers=headers).content
 					with open(dir_name + "/" + str(counter) + '.jpg', 'wb') as writer:
 						writer.write(img_data)
-					# Printing percentages to show progress
-					sys.stdout.write("\r" + str(int(counter/size * 100)) + "%")
-					sys.stdout.flush()
 					break
 				except:
 					pass
 			counter += 1
 		ch_counter += 1
-		print()
 
-	print("-- DOWNLOAD COMPLETED --")
+	send_to_console(console_object, "-- DOWNLOAD COMPLETED --", 2)
 
 
-def download_controller():
-	find_manga = input("Search manga: ")
-	success, name, link = get_link(find_manga)
-	print("--- RESULTS ---")
+# Function that takes in the pyqt window object so it can send relevant print data to the user
+# This information is displayed on the pyqt window.
+def send_to_console(console_object, msg, duration):
+	console_object.setText(console_object.text() + "\n" + msg)
+	if duration > 0:
+		time.sleep(duration)
+
+
+# This is the main control function for getting needed data and downloading to the directory.
+def download_controller(console_object, name):
+	success, name, link = get_link(console_object, name)
+
+	send_to_console(console_object, "--- RESULTS ---", .7)
+
 	if not success:
-		print(find_manga + " was not found in current databases.")
-		print("Returning to main menu.")
-		time.sleep(2)
+		send_to_console(console_object, find_manga + " was not found in current databases.", .3)
+		send_to_console(console_object, find_manga + "Returning to main menu.", 2)
 		return
-	print(name + ": " + link)
-	success = input("Is this right(y/n)?: ")
-	if success == "y":
-		os.mkdir(PARENTFOLDER + "/" + name)
-		# data.txt file is created to store this information to be used
-		with open(PARENTFOLDER + "/" + name +"/data.txt", "w") as writer:
-			writer.write("0\n")
-			writer.write(link)
-		
-		print("--- PREPARING TO DOWNLOAD ---")
 
-		time.sleep(3)
-		# RUNS THE DOWNLOAD METHOD
-		download_manga(name, link)
-	else:
-		print("--- QUITTING ---")
+	send_to_console(console_object, "Found: " + name + ": " + link, .7)
+	send_to_console(console_object, "DOWNLOAD ATTEMPT IN 5 SECONDS, QUIT IF YOU WANT TO CANCEL PROCESS", 5)
 
-	# return name, link
+	send_to_console(console_object, "--- PREPARING TO DOWNLOAD ---", 2)
+
+	os.mkdir(PARENTFOLDER + "/" + name)
+	# data.txt file is created to store this information to be used
+	with open(PARENTFOLDER + "/" + name +"/data.txt", "w") as writer:
+		writer.write("0\n")
+		writer.write(link)
+
+	# RUNS THE DOWNLOAD METHOD
+	download_manga(console_object, name, link)
