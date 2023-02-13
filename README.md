@@ -3,7 +3,7 @@ This is a program that allows the user to download and read manga through the GU
 The downloading is done by parsing through the manga site "Manganato", and systematically downloading panels to respective directories
 More sites will be added to increase number of available mangas for this program
 
-WORKING COMPILED VERSION OF THE APP CAN BE FOUND AT THIS LINK
+WORKING COMPILED VERSION OF MANGOASIS
 https://drive.google.com/file/d/1JCvStum8viroXGMQ6jdckc1S5TV4GIKi/view?usp=share_link
 =============================================================================================
 
