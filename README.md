@@ -5,7 +5,7 @@ More sites will be added to increase number of available mangas for this program
 
 https://drive.google.com/file/d/1JCvStum8viroXGMQ6jdckc1S5TV4GIKi/view?usp=share_link
 =============================================================================================
-WORKING COMPILED VERSION OF THE APP CAN BE FOUND AT THE LINK ABOVE
+WORKING COMPILED VERSION OF THE APP CAN BE FOUND AT THE LINK ABOVE.
 GUI functionality is now fully working. Entire program can be used through the GUI and not the command line.
 
 * You will need to extract everything and keep all of the files inside in one directory
