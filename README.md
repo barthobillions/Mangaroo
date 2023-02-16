@@ -1,4 +1,4 @@
-# MangOasis
+# Mangaroo
 This is a program that allows the user to download and read manga through the GUI created with PYQT5.
 The downloading is done by parsing through the manga site "Manganato", and systematically downloading panels to respective directories.
 More sites will be added to increase number of available mangas for this program
