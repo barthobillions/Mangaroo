@@ -4,7 +4,7 @@ The downloading is done by parsing through the manga site "Manganato", and syste
 More sites will be added to increase number of available mangas for this program
 
 WORKING COMPILED VERSION OF MANGOASIS
-https://drive.google.com/file/d/1JCvStum8viroXGMQ6jdckc1S5TV4GIKi/view?usp=share_link
+https://drive.google.com/file/d/1vKNdzed9SKf9d29-yOJFkFpi5f3Syy0p/view?usp=share_link
 =============================================================================================
 
 DIRECTIONS
