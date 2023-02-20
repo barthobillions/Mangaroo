@@ -13,7 +13,8 @@ class MenuScreen(QtWidgets.QMainWindow):
         self.menu = menu
         self.menu.setObjectName("menu")
         self.menu.resize(800, 600)
-        self.menu.setStyleSheet("background-color: #3E363F;")
+        self.menu.setMaximumSize(800, 600)
+        self.menu.setStyleSheet("background-color: #303036;")
         self.btn_group = QtWidgets.QButtonGroup()
         self.btn_group.setExclusive(False)
 
@@ -32,19 +33,19 @@ class MenuScreen(QtWidgets.QMainWindow):
         self.centralwidget.setObjectName("centralwidget")
 
         self.CONTAINER = QtWidgets.QWidget(self.centralwidget)
-        self.CONTAINER.setGeometry(QtCore.QRect(400, 20, 381, 561))
-        self.CONTAINER.setStyleSheet("background-color: #E7DECD;\n""border-radius:10px;")
+        self.CONTAINER.setGeometry(QtCore.QRect(580, 20, 200, 560))
+        self.CONTAINER.setStyleSheet("background-color: #A2A3BB;")
         #======================================================================================================================================
         # This is where the selectable manga will be displayed
         self.list_container = QtWidgets.QWidget(self.CONTAINER)
-        self.list_container.setGeometry(QtCore.QRect(10, 10, 370, 540))
+        self.list_container.setGeometry(QtCore.QRect(0, 0, 200, 560))
         self.verticalLayout = QtWidgets.QVBoxLayout(self.list_container)
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.list_scrollzone = QtWidgets.QScrollArea(self.list_container)
         self.list_scrollzone.setMinimumSize(QtCore.QSize(0, 0))
         self.list_scrollzone.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 346, 800))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 156, 800))
         self.scrollAreaWidgetContents.setMinimumSize(QtCore.QSize(0, 0))
         self.list_scrollzone.setWidget(self.scrollAreaWidgetContents)
         self.verticalLayout.addWidget(self.list_scrollzone)
@@ -76,7 +77,7 @@ class MenuScreen(QtWidgets.QMainWindow):
         # This button force terminates the program
         # It is used when the user doesn't force terminate the program to stop downloading in the download window
         self.TERMINATE = QtWidgets.QPushButton(self.centralwidget)
-        self.TERMINATE.setGeometry(QtCore.QRect(300, 550, 31, 31))
+        self.TERMINATE.setGeometry(QtCore.QRect(535, 550, 31, 31))
         self.TERMINATE.setStyleSheet("QPushButton {\n""background-color: #E7DECD;\n""border-radius:10px;\n"
 "}\n""\n""QPushButton:hover {\n""background-color:#bda06e;\n""\n""}\n""\n""QPushButton:pressed {\n""background-color: rgb(98, 84, 67);\n""}")
         icon = QtGui.QIcon()
@@ -84,28 +85,23 @@ class MenuScreen(QtWidgets.QMainWindow):
         self.TERMINATE.setIcon(icon)
         self.TERMINATE.setIconSize(QtCore.QSize(28, 28))
         self.TERMINATE.setObjectName("TERMINATE")
-        self.TERMINATE.clicked.connect(lambda: os._exit(1))
-
-        self.term_info = QtWidgets.QLabel(self.centralwidget)
-        self.term_info.setGeometry(QtCore.QRect(175, 555, 125, 15))
-        self.term_info.setStyleSheet("font: 63 11pt \"Myriad Pro Light\";")
-        self.term_info.setObjectName("info")
-        self.term_info.setText("force terminate ->")
+        # self.TERMINATE.clicked.connect(lambda: os._exit(1))
+        self.TERMINATE.clicked.connect(self.terminate)
         #======================================================================================================================================
         # Area where selected manga information will be displayed
         # Once something valid is selected, the open/delete button will be usable
         self.tbn_container = QtWidgets.QWidget(self.centralwidget)
-        self.tbn_container.setGeometry(QtCore.QRect(20, 20, 331, 481))
-        self.tbn_container.setStyleSheet("background-color: #E7DECD;\n""border-radius:15px;")
+        self.tbn_container.setGeometry(QtCore.QRect(20, 20, 550, 500))
+        self.tbn_container.setStyleSheet("background-color: #A2A3BB")
         self.tbn_container.setObjectName("tbn_container")
         self.thumbnail = QtWidgets.QLabel(self.tbn_container)
-        self.thumbnail.setGeometry(QtCore.QRect(50, 10, 231, 271))
+        self.thumbnail.setGeometry(QtCore.QRect(150, 5, 260, 350))
         self.thumbnail.setStyleSheet("")
         self.thumbnail.setObjectName("thumbnail")
         self.thumbnail.setScaledContents(True)
         self.description = QtWidgets.QLabel(self.tbn_container)
-        self.description.setGeometry(QtCore.QRect(40, 290, 251, 81))
-        self.description.setStyleSheet("font: 63 12pt \"Segoe UI Semibold\";")
+        self.description.setGeometry(QtCore.QRect(180, 355, 200, 80))
+        self.description.setStyleSheet("font: 63 10pt \"Segoe UI Semibold\";")
         self.description.setObjectName("description")
         self.description.setAlignment(QtCore.Qt.AlignCenter)
 
@@ -121,7 +117,7 @@ class MenuScreen(QtWidgets.QMainWindow):
         # This button opens the manga at the saved chapter
         # Will only run if a manga is present and selected
         self.open = QtWidgets.QPushButton(self.tbn_container)
-        self.open.setGeometry(QtCore.QRect(10, 430, 141, 41))
+        self.open.setGeometry(QtCore.QRect(180, 450, 200, 40))
         self.open.setStyleSheet("QPushButton {\n""background-color: rgb(109, 109, 163);\n""border-radius:10px;\n""font: 63 11pt \"Myriad Pro Light\";\n""}\n""\n""QPushButton:hover {\n""background-color: rgb(99, 99, 148);\n""\n""}\n""\n""QPushButton:pressed {\n""background-color: rgb(68, 68, 103);\n""}")
         self.open.setIconSize(QtCore.QSize(28, 28))
         self.open.setObjectName("open")
@@ -129,7 +125,7 @@ class MenuScreen(QtWidgets.QMainWindow):
         #======================================================================================================================================
         # This button opens the downloader window to allow the user to download more material
         self.download = QtWidgets.QPushButton(self.tbn_container)
-        self.download.setGeometry(QtCore.QRect(270, 430, 51, 41))
+        self.download.setGeometry(QtCore.QRect(10, 450, 51, 40))
         self.download.setStyleSheet("QPushButton {\n""background-color: rgb(109, 109, 163);\n""border-radius:10px;\n""}\n""\n""QPushButton:hover {\n""background-color: rgb(99, 99, 148);\n""\n""}\n""\n""QPushButton:pressed {\n""background-color: rgb(68, 68, 103);\n""}")
         download_ico = QtGui.QIcon()
         download_ico.addPixmap(QtGui.QPixmap("icons/download.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -140,7 +136,7 @@ class MenuScreen(QtWidgets.QMainWindow):
         #======================================================================================================================================
         # This button allows the user to delete the selected manga from the save location
         self.delete_btn = QtWidgets.QPushButton(self.tbn_container)
-        self.delete_btn.setGeometry(QtCore.QRect(200, 430, 51, 41))
+        self.delete_btn.setGeometry(QtCore.QRect(70, 450, 51, 40))
         self.delete_btn.setStyleSheet("QPushButton {\n""background-color: rgb(109, 109, 163);\n""border-radius:10px;\n""}\n""\n""QPushButton:hover {\n""background-color: rgb(99, 99, 148);\n""\n""}\n""\n""QPushButton:pressed {\n""background-color: rgb(68, 68, 103);\n""}")
         del_ico = QtGui.QIcon()
         del_ico.addPixmap(QtGui.QPixmap("icons/del.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -156,8 +152,8 @@ class MenuScreen(QtWidgets.QMainWindow):
 
     def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
-        self.menu.setWindowTitle(_translate("menu", "MangOasis"))
-        self.menu.setWindowIcon(QtGui.QIcon("icons/mango_icon.png"))
+        self.menu.setWindowTitle(_translate("menu", "Mangaroo"))
+        self.menu.setWindowIcon(QtGui.QIcon("icons/win_icon.png"))
         self.open.setText(_translate("menu", "OPEN"))
         self.list_available()
 
@@ -170,19 +166,19 @@ class MenuScreen(QtWidgets.QMainWindow):
         else:
             total_scroll_height = len(manga_in_folder) * 40
             if total_scroll_height > 561:
-                self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 346, total_scroll_height))
+                self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 156, total_scroll_height))
                 self.scrollAreaWidgetContents.setMinimumSize(QtCore.QSize(0, total_scroll_height))
             curr_height = 10
             btn_counter = 0
             for manga in manga_in_folder:
                 button = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
-                button.setGeometry(QtCore.QRect(15, curr_height, 335, 30))
-                button.setStyleSheet("QPushButton {\n""background-color: #d4ccbd;\n""border-radius:10px;\nfont: 63 12pt \"Segoe UI Semibold\";\n""}\n""\n""QPushButton:hover {\n""background-color:#bda06e;\n""\n""}\n""\n""QPushButton:pressed {\n""background-color: rgb(98, 84, 67);\n""}")
+                button.setGeometry(QtCore.QRect(5, curr_height, 190, 20))
+                button.setStyleSheet("QPushButton {\n""background-color: #A8AADC;\n""border-radius:0x;\nfont: 63 10pt \"Segoe UI Semibold\";\n""}\n""\n""QPushButton:hover {\n""background-color:#474AAE;\n""\n""}\n""\n""QPushButton:pressed {\n""background-color: #292B65;\n""}")
                 button.setText(manga)
                 id = btn_counter
                 self.btn_group.addButton(button, id)
                 btn_counter += 1
-                curr_height += 35
+                curr_height += 25
 
     # Function that handles selecting of a manga
     # When user clicks on displayed manga, the thumbnail and relevant info will be updated
@@ -201,6 +197,16 @@ class MenuScreen(QtWidgets.QMainWindow):
     def quit(self):
         self.cont = False
         self.menu.close()
+
+    # Confirms with user whether or not they want to force quit
+    def terminate(self):
+        confirm = QtWidgets.QMessageBox()
+        confirm.setWindowTitle("Force quit?")
+        confirm.setText("Are you sure you want to force quit?")
+        confirm.setIcon(QtWidgets.QMessageBox.Warning)
+        confirm.setStandardButtons(QtWidgets.QMessageBox.Yes|QtWidgets.QMessageBox.No)
+        confirm.buttonClicked.connect(self.confirm_term)
+        confirm.exec_()
 
     # Function that handles the open button being pressed
     # Will run prompt asking user if an update should be ran
@@ -243,6 +249,11 @@ class MenuScreen(QtWidgets.QMainWindow):
     def remove_path(self, btnClicked):
         if btnClicked.text() == "&Yes":
             shutil.rmtree(self.selected_manga)
+
+    # Helper method for confirmation on termination
+    def confirm_term(self, btnClicked):
+        if btnClicked.text() == "&Yes":
+            os._exit(1)
 
     # Function that displays popup prompting user to confirm deletion of selected manga
     def rem_confirm(self):
