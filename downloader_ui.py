@@ -54,7 +54,7 @@ class Download_Window(QtWidgets.QWidget):
         self.TERMINATE.setIcon(icon)
         self.TERMINATE.setIconSize(QtCore.QSize(28, 28))
         self.TERMINATE.setObjectName("TERMINATE")
-        self.TERMINATE.clicked.connect(lambda: os._exit(1))
+        self.TERMINATE.clicked.connect(self.terminate)
 
         # This window displays text to the user that is relevant to the downloading process
         self.console_output = QtWidgets.QLabel(self.frame)
@@ -69,7 +69,8 @@ class Download_Window(QtWidgets.QWidget):
 
     def retranslateUi(self, DownloadWindow):
         _translate = QtCore.QCoreApplication.translate
-        DownloadWindow.setWindowTitle(_translate("DownloadWindow", "MainWindow"))
+        DownloadWindow.setWindowTitle(_translate("DownloadWindow", "Mangaroo-Downloader"))
+        DownloadWindow.setWindowIcon(QtGui.QIcon("icons/win_icon.png"))
         self.SEARCH.setText(_translate("DownloadWindow", "SEARCH"))
         self.console_output.setText(_translate("DownloadWindow", ""))
 
@@ -80,3 +81,18 @@ class Download_Window(QtWidgets.QWidget):
             # Runs downloading in multi-thread to allow data to be passed between windows (console log)
             t1 = threading.Thread(target=download_controller, args=(self.console_output, name))
             t1.start()
+
+    # Confirms with user whether or not they want to force quit
+    def terminate(self):
+        confirm = QtWidgets.QMessageBox()
+        confirm.setWindowTitle("Force quit?")
+        confirm.setText("Are you sure you want to force quit?")
+        confirm.setIcon(QtWidgets.QMessageBox.Warning)
+        confirm.setStandardButtons(QtWidgets.QMessageBox.Yes|QtWidgets.QMessageBox.No)
+        confirm.buttonClicked.connect(self.confirm_term)
+        confirm.exec_()
+
+    # Helper method for confirmation on termination
+    def confirm_term(self, btnClicked):
+        if btnClicked.text() == "&Yes":
+            os._exit(1)
